@@ -1,0 +1,41 @@
+# Stock Enhanced: Advanced Momentum Strategy Suite Requirements
+# Core dependencies for momentum strategy backtesting and analysis
+
+# Essential data processing
+numpy>=1.21.0
+pandas>=1.5.0
+
+# Financial data and backtesting
+yfinance>=0.2.0
+nautilus-trader>=1.197.0
+
+# Data visualization and analysis
+matplotlib>=3.5.0
+seaborn>=0.11.0
+plotly>=5.0.0
+
+# Web scraping for index constituents
+beautifulsoup4>=4.10.0
+lxml>=4.6.0
+html5lib>=1.1
+requests>=2.25.0
+
+# Jupyter notebook support
+jupyter>=1.0.0
+nbformat>=5.0.0
+nbclient>=0.5.0
+
+# Scientific computing
+scipy>=1.7.0
+
+# Optional: Enhanced analytics (uncomment if needed)
+# quantstats>=0.0.59
+# vectorbt>=0.25.0
+# numba>=0.56.0
+
+# Data export
+openpyxl>=3.0.0
+
+# Development and testing (optional)
+# pytest>=6.0.0
+# black>=22.0.0
