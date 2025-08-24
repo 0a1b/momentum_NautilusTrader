@@ -370,18 +370,53 @@ def run_walkforward(
         if run_in_parallel:
             if verbose:
                 print(f"  Running {len(tasks)} tasks in parallel with {max_workers or 4} workers...")
+            
+            # Use subprocess-based parallel execution to avoid logging issues
+            def run_task_subprocess(task):
+                with tempfile.NamedTemporaryFile(suffix='.pkl', delete=False) as args_file:
+                    pickle.dump(task, args_file)
+                    args_path = args_file.name
+                
+                with tempfile.NamedTemporaryFile(suffix='.pkl', delete=False) as result_file:
+                    result_path = result_file.name
+                
+                try:
+                    # Run subprocess with timeout and complete output suppression
+                    subprocess.run([
+                        'python3', '-c', 
+                        f'import sys; sys.path.append("{os.path.dirname(__file__)}"); '
+                        f'from momentum_walkforward_core import _run_engine_subprocess; '
+                        f'_run_engine_subprocess("{args_path}", "{result_path}")'
+                    ], timeout=300, capture_output=True, check=True)
+                    
+                    with open(result_path, 'rb') as f:
+                        out = pickle.load(f)
+                    return out
+                
+                except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+                    return None
+                finally:
+                    # Cleanup temp files
+                    try:
+                        os.unlink(args_path)
+                        os.unlink(result_path)
+                    except Exception:
+                        pass
+            
             with ThreadPoolExecutor(max_workers=max_workers or 4) as ex:
-                for fut in as_completed(ex.submit(_single_param_fold, t) for t in tasks):
+                for fut in as_completed(ex.submit(run_task_subprocess, t) for t in tasks):
                     try:
                         out = fut.result()
                     except Exception as e:
-                        # Skip failed tasks but continue others
-                        print(f"  [WARN] Task failed: {e}")
+                        if verbose:
+                            print(f"  [WARN] Task failed: {e}")
                         continue
                     if out is None:
                         continue
                     _, row = out
                     rows.append(row)
+                    if verbose and len(rows) % 5 == 0:
+                        print(f"    Completed {len(rows)}/{len(tasks)} tasks")
         else:
             if verbose:
                 print(f"  Running {len(tasks)} tasks sequentially...")
