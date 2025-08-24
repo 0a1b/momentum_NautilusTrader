@@ -135,10 +135,12 @@ TX_COST = 7.0                 # $7 per trade
 ```
 
 **Key Features**:
-- **Robust Execution**: Subprocess isolation prevents Jupyter kernel hangs
-- **Progress Tracking**: Verbose mode shows real-time progress
-- **Error Recovery**: Failed windows are skipped, execution continues  
+- **Robust Parallel Execution**: Subprocess isolation prevents Jupyter kernel hangs even with multiple workers
+- **Scalable Performance**: Support for 1-16+ parallel workers with automatic load balancing
+- **Progress Tracking**: Verbose mode shows real-time progress without log spam
+- **Error Recovery**: Failed windows are skipped, execution continues seamlessly
 - **Timeout Protection**: 5-minute timeout per window prevents infinite hangs
+- **Complete Output Isolation**: NautilusTrader engine logs are fully suppressed in parallel mode
 
 ### Core Python Modules
 
@@ -363,14 +365,17 @@ PARAM_GRID = [{'LOOKBACK': 200, 'ROC': 200, 'REB_DAYS': 14, 'POS_SIZE': 0.95}]  
 # Full scope for comprehensive results  
 GLOBAL_END = '2025-07-31'                    # Full recent history
 CANDIDATE_INDICES = ['SP500','NASDAQ100','DAX40','FTSE100','CAC40','NIFTY50']  # Multiple indices
-run_in_parallel = True                       # Enable after testing
-max_workers = 4                              # Adjust based on CPU cores
+run_in_parallel = True                       # Safe to enable with subprocess isolation
+max_workers = 8                              # Scale up to 8-16 workers for best performance
+verbose = True                               # Track progress without log spam
 ```
 
 **Troubleshooting**:
-- **Jupyter hangs**: Keep `run_in_parallel=False` and `verbose=True`
-- **Memory issues**: Reduce `CANDIDATE_INDICES` or shorten time windows
+- **Log spam/hangs**: Use `run_in_parallel=True` with subprocess isolation (now default safe mode)
+- **Performance**: Start with `max_workers=4`, scale up to 8-16 based on CPU cores
+- **Memory issues**: Reduce `CANDIDATE_INDICES` or shorten time windows  
 - **Network errors**: Add delays between yfinance calls, check internet connection
 - **Empty results**: Verify ticker symbols are valid and have sufficient price history
+- **Timeout issues**: Tasks auto-timeout at 5 minutes; increase if needed for very large datasets
 
 This comprehensive momentum strategy suite provides enterprise-grade backtesting capabilities with robust error handling, making it suitable for both research and potential production deployment.
